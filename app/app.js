@@ -2,12 +2,14 @@ import express from 'express';
 import bodyParser from 'body-parser';
 import morgan from 'morgan';
 import cors from 'cors';
-import expressValidation from 'express-validation';
 import createError from 'http-errors';
 import routesV1 from './routes.v1';
 import { errorHandler } from '@util';
+import { mongooseConnect } from '@util';
 
 const app = express();
+
+mongooseConnect();
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
