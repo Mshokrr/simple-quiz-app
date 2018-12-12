@@ -114,7 +114,7 @@
     "url": "POST /form",
     "authorization": ["Candidate"],
     "requestBody": {
-      "data": {} // According to the schema given in getQuestions
+      "data": {} // "Properties of this object are according to the schema given in getQuestions"
     }
   },
   "getAnswers": {
