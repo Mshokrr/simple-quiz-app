@@ -38,10 +38,11 @@ export default {
       id: Joi.string().required()
     }
   },
-  submitAnswers: {
+  submitAnswer: {
     body: {
       data: Joi.object()
     }
   },
-  getAnswers: {}
+  getAnswers: {},
+  getAnswerDetails: {}
 };

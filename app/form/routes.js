@@ -10,14 +10,22 @@ const router = express.Router();
 
 router.get('/', controller.getAnswers, (req, res) => {
   res.status(200).json({
-    message: 'Form fetched successfully',
+    message: 'Answers fetched successfully',
     data: req.data
   });
 });
 
-router.post('/', controller.submitAnswers, (req, res) => {
+router.get('/details/:id', controller.getAnswerDetails, (req, res) => {
   res.status(200).json({
-    message: 'Form posted successfully',
+    message: 'Answer fetched successfully',
+    data: req.data
+  });
+});
+
+router.post('/', controller.submitAnswer, (req, res) => {
+  res.status(200).json({
+    message:
+      'Answer data sent. Check the response data for any schematic errors.',
     data: req.data
   });
 });
@@ -31,7 +39,7 @@ router.get('/questions', controller.getQuestions, (req, res) => {
 
 router.post('/questions', controller.addQuestions, (req, res) => {
   res.status(200).json({
-    message: 'Question posted successfully',
+    message: 'Questions posted successfully',
     data: req.data
   });
 });

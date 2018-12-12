@@ -7,7 +7,7 @@ import model from './model';
 
 const validSchema = (schema, obj) => {
   const errors = [];
-  const fieldsUsed = [];
+  const questionsAnswered = [];
   for (let i = 0; i < schema.length; i += 1) {
     const val = obj[schema[i].name];
     if (val === undefined && schema[i].required) {
@@ -18,7 +18,7 @@ const validSchema = (schema, obj) => {
     }
     if (!(val === undefined || val === null)) {
       /* eslint-disable no-underscore-dangle */
-      fieldsUsed.push(schema[i]._id);
+      questionsAnswered.push(schema[i]._id);
       switch (schema[i].type) {
         case 'Boolean':
           if (typeof val !== 'boolean') {
@@ -66,8 +66,9 @@ const validSchema = (schema, obj) => {
   }
   return {
     valid: !errors.length,
+    saved: !errors.length,
     errors,
-    fieldsUsed
+    questionsAnswered
   };
 };
 
@@ -77,7 +78,7 @@ const validateAnswerSchema = obj =>
     .then(questions => {
       const result = validSchema(questions, obj);
       return Promise.resolve({
-        questions,
+        questionsProvided: questions,
         formData: obj,
         ...result
       });

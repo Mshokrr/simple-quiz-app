@@ -1,0 +1,128 @@
+{
+  "baseUrl": "http://172.104.209.122:3000/",
+  "register": {
+    "url": "POST /auth/register",
+    "authorization": [],
+    "requestBody": {
+      "email": "user@gamil.com", // REQUIRED
+      "password": "test", // REQUIRED, minimum: 4 characters
+      "firstName": "John", // REQUIRED
+      "lastName": "Doe", // REQUIRED,
+      "role": 1 // 1: Candidate (default) 2: Admin, Use this to create an admin user
+    },
+    "response": {
+      "message": "Registration successful",
+      "data": {
+        "user": {
+          "role": 1,
+          "_id": "xxxxxxxxxxxxxxxxx",
+          "email": "user@gamil.com",
+          "password": "xxxx",
+          "firstName": "John",
+          "lastName": "Doe",
+          "__v": 0,
+          "roleName": "Candidate"
+        },
+        "token": "xxxxx.xxxxx.xxxx"
+      }
+    }
+  },
+  "login": {
+    "url": "POST /auth/login",
+    "authorization": [],
+    "requestBody": {
+      "email": "user@gmail.com", // REQUIRED
+      "password": "test" // REQUIRED
+    },
+    "response": {
+      "message": "Login successful",
+      "data": {
+        "user": {
+          "role": 1,
+          "_id": "xxxxxxxxxxxxxxxxx",
+          "email": "user@gamil.com",
+          "password": "xxxx",
+          "firstName": "John",
+          "lastName": "Doe",
+          "__v": 0,
+          "roleName": "Candidate"
+        },
+        "token": "xxxxx.xxxxx.xxxx"
+      }
+    }
+  },
+  "getQuestions": {
+    "url": "GET /form/questions",
+    "authorization": ["Admin", "Candidate"]
+  },
+  "addQuestion": {
+    "url": "POST /form/questions",
+    "authorization": ["Admin"],
+    "requestBody": {
+      "questions": [
+        {
+          "name": "name", // REQUIRED
+          "questionText": "Question Text?", // REQUIRED
+          "type": "String", // values: ['String', 'Boolean', 'Integer'], default: 'STRING',
+          "required": true // default: false
+        }
+      ], // Bulk insert of questions, if this property is sent, the next one is ignored
+      "question": {
+        "name": "name", // REQUIRED
+        "questionText": "Question Text?", // REQUIRED
+        "type": "String", // values: ['String', 'Boolean', 'Integer'], default: 'STRING',
+        "required": true // default: false
+      } // single insert of a question
+    },
+    "response": {
+      "message": "Questions posted successfully",
+      "data": {
+        "questions": [
+          {
+            "type": "String",
+            "required": true,
+            "active": true,
+            "_id": "xxxxxxx",
+            "name": "name",
+            "questionText": "Question Text?",
+            "__v": 0
+          }
+        ]
+      }
+    }
+  },
+  "updateQuestion": {
+    "url": "PATCH /form/questions/:id",
+    "authorization": ["Admin"],
+    "requestBody": {
+      "question": {
+        "name": "name",
+        "questionText": "Question Text?",
+        "type": "String",
+        "required": true
+      }
+    },
+    "response": {
+      "message": "Questions updated successfully"
+    }
+  },
+  "deleteQuestion": {
+    "url": "DELETE /form/questions/:id",
+    "authorization": ["Admin"]
+  },
+  "submitAnswer": {
+    "url": "POST /form",
+    "authorization": ["Candidate"],
+    "requestBody": {
+      "data": {} // According to the schema given in getQuestions
+    }
+  },
+  "getAnswers": {
+    "url": "GET /form",
+    "authorization": ["Admin"]
+  },
+  "getAnswerDetails": {
+    "url": "GET /form/details/:id", // path parameter "id" is the property _id of a specific answer
+    "authorization": ["Admin"]
+  }
+}

@@ -1,4 +1,5 @@
 import models from '@model';
+import { model } from 'mongoose';
 
 /**
  * form Model Layer
@@ -19,7 +20,9 @@ const addAnswerSet = answers => models.AnswerSet.create(answers);
 
 const getAnswers = () => models.AnswerSet.find();
 
-const getUserById = id => models.User.find({ _id: id });
+const getAnswerDetails = id => models.AnswerSet.findOne({ _id: id });
+
+const getQuestionsUsed = ids => models.Question.find({ _id: { $in: ids } });
 
 export default {
   getQuestions,
@@ -28,5 +31,6 @@ export default {
   deactivateQuestion,
   addAnswerSet,
   getAnswers,
-  getUserById
+  getAnswerDetails,
+  getQuestionsUsed
 };

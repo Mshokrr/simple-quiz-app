@@ -61,15 +61,15 @@ const deactivateQuestion = (req, res, next) => {
 };
 
 const addAnswerSet = (req, res, next) => {
-  if (req.data.answerSet.valid) {
+  if (req.data.answers.valid) {
     model
       .addAnswerSet({
-        formData: req.data.answerSet.formData,
+        formData: req.data.answers.formData,
         userId: req.decoded.id,
         userName: `${req.decoded.firstName} ${req.decoded.lastName} <${
           req.decoded.email
         }>`,
-        questions: req.data.answerSet.fieldsUsed
+        questions: req.data.answers.questionsAnswered
       })
       .then(() => next())
       .catch(err => {
@@ -78,7 +78,7 @@ const addAnswerSet = (req, res, next) => {
       });
   } else {
     req.data = { ...req.data, errors: req.data.errors };
-    next(createError(400, 'Invalid schema. 1'));
+    next(createError(400, 'Invalid schema.'));
   }
 };
 
@@ -86,21 +86,72 @@ const validateAndAddAnswerSet = (req, res, next) => {
   helper
     .validateAnswerSchema(req.body.data)
     .then(answerSet => {
+      req.data = { ...req.data, answers: answerSet };
       if (answerSet.errors.length) {
-        next(createError(400, new Error('Invalid Schema. 2')));
+        next();
         return;
       }
-      req.data = { ...req.data, answerSet };
       addAnswerSet(req, res, next);
     })
-    .catch(() => next(createError(400, 'Invalid schema. 3')));
+    .catch(err => {
+      console.log(err);
+      next(createError(400, 'Invalid schema. [2]'));
+    });
 };
 
 const getAnswers = (req, res, next) => {
-  model.getAnswers().then(answers => {
-    req.data = { ...req.data, answers };
-    next();
-  });
+  model
+    .getAnswers()
+    .then(answers => {
+      req.data = {
+        ...req.data,
+        answers: answers.map(answer => ({
+          questionsAnswered: answer.questions,
+          ...answer.toJSON()
+        }))
+      };
+      next();
+    })
+    .catch(_ => next(createError(500, 'Internal server error.')));
+};
+
+const getAnswerDetails = (req, res, next) => {
+  model
+    .getAnswerDetails(req.params.id)
+    .then(answer => {
+      if (!answer) {
+        next(createError(404, 'Answer not found, invalid id'));
+        return;
+      }
+      req.data = {
+        ...req.data,
+        answer: {
+          questionsAnsweredIds: answer.questions,
+          ...answer.toJSON()
+        }
+      };
+      next();
+    })
+    .catch(err => {
+      console.log(err);
+      next(createError(404, 'Answer not found, invalid id'));
+    });
+};
+
+const embedQuestionsUsed = (req, res, next) => {
+  model
+    .getQuestionsUsed(req.data.answer.questions)
+    .then(questions => {
+      req.data = {
+        ...req.data,
+        answer: { ...req.data.answer, questionsAnsweredDetails: questions }
+      };
+      next();
+    })
+    .catch(err => {
+      console.log(err);
+      next(createError(500, 'Internal server error.'));
+    });
 };
 
 export default {
@@ -113,25 +164,25 @@ export default {
   addQuestions: [
     validate(validation.addQuestions),
     auth.ensureAuthenticated,
-    pipelines.checkRole(roles.getQuestions),
+    pipelines.checkRole(roles.addQuestions),
     addQuestions
   ],
   updateQuestion: [
     validate(validation.updateQuestion),
     auth.ensureAuthenticated,
-    pipelines.checkRole(roles.getQuestions),
+    pipelines.checkRole(roles.updateQuestion),
     updateQuestion
   ],
   deactivateQuestion: [
     validate(validation.deactivateQuestion),
     auth.ensureAuthenticated,
-    pipelines.checkRole(roles.getQuestions),
+    pipelines.checkRole(roles.deactivateQuestion),
     deactivateQuestion
   ],
-  submitAnswers: [
-    validate(validation.submitAnswers),
+  submitAnswer: [
+    validate(validation.submitAnswer),
     auth.ensureAuthenticated,
-    pipelines.checkRole(roles.submitAnswers),
+    pipelines.checkRole(roles.submitAnswer),
     validateAndAddAnswerSet
   ],
   getAnswers: [
@@ -139,5 +190,12 @@ export default {
     auth.ensureAuthenticated,
     pipelines.checkRole(roles.getAnswers),
     getAnswers
+  ],
+  getAnswerDetails: [
+    validate(validation.getAnswerDetails),
+    auth.ensureAuthenticated,
+    pipelines.checkRole(roles.getAnswerDetails),
+    getAnswerDetails,
+    embedQuestionsUsed
   ]
 };
